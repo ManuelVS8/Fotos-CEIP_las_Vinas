@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- memoria.html — v8 (botón flotante para saltar de año desde cualquier punto) -->
+<!-- memoria.html — v9 (solo barra fija arriba, sin botón flotante) -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -271,54 +271,6 @@
     font-family:'Caveat',cursive; font-size:1.3rem;
     color:#9db1e8;
   }
-
-  /* BOTÓN FLOTANTE DE NAVEGACIÓN RÁPIDA */
-  .fab{
-    position:fixed;
-    right:18px; bottom:18px;
-    width:56px; height:56px;
-    border-radius:50%;
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));
-    color:#fff;
-    border:none;
-    box-shadow:0 8px 22px rgba(0,0,0,.4);
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.5rem;
-    cursor:pointer;
-    z-index:50;
-    touch-action:manipulation;
-  }
-  .fab-menu{
-    position:fixed;
-    right:18px; bottom:84px;
-    background:var(--paper);
-    border-radius:12px;
-    box-shadow:0 12px 32px rgba(0,0,0,.4);
-    padding:8px;
-    display:none;
-    flex-direction:column;
-    gap:2px;
-    max-height:60vh;
-    overflow-y:auto;
-    z-index:50;
-    min-width:140px;
-  }
-  .fab-menu.open{display:flex;}
-  .fab-menu button{
-    background:none; border:none;
-    text-align:left;
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:.9rem;
-    color:var(--ink);
-    padding:9px 12px;
-    border-radius:7px;
-    cursor:pointer;
-  }
-  .fab-menu button:hover, .fab-menu button.active{
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));
-    color:#fff;
-  }
 </style>
 </head>
 <body>
@@ -347,9 +299,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-
-  <button class="fab" id="fabBtn" aria-label="Ir a un año">☰</button>
-  <div class="fab-menu" id="fabMenu"></div>
 
 <script>
 (async function(){
@@ -423,9 +372,7 @@
     activeYear = anio;
     renderTabs();
     renderGrid();
-    renderFabMenu();
     irArribaDelContenido();
-    fabMenu.classList.remove('open');
   }
   function renderTabs(){
     tabsEl.innerHTML = '';
@@ -443,28 +390,6 @@
       tabsEl.appendChild(t);
     });
   }
-
-  // Botón flotante: mismo listado de años, accesible desde cualquier punto del scroll
-  const fabBtn = document.getElementById('fabBtn');
-  const fabMenu = document.getElementById('fabMenu');
-  function renderFabMenu(){
-    fabMenu.innerHTML = '';
-    const opciones = [{ v:'todas', label:`Todas (${manifest.length})` }]
-      .concat(anios.map(a => ({ v:a, label: a === 'sin-fecha' ? 'Sin fecha' : a })));
-    opciones.forEach(op => {
-      const b = document.createElement('button');
-      b.textContent = op.label;
-      b.className = activeYear === op.v ? 'active' : '';
-      b.onclick = () => cambiarAnio(op.v);
-      fabMenu.appendChild(b);
-    });
-  }
-  fabBtn.onclick = () => fabMenu.classList.toggle('open');
-  document.addEventListener('click', (e) => {
-    if (!fabMenu.contains(e.target) && e.target !== fabBtn && fabMenu.classList.contains('open')) {
-      fabMenu.classList.remove('open');
-    }
-  });
 
   let visibles = manifest; // fotos actualmente mostradas, para el lightbox
   function renderGrid(){
@@ -499,7 +424,6 @@
 
   renderTabs();
   renderGrid();
-  renderFabMenu();
 
   // Lightbox
   const lb = document.getElementById('lightbox');
