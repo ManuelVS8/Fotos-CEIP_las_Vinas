@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- memoria.html — v6 (sin-fecha agrupado dentro de 2015, sin pestaña propia) -->
+<!-- memoria.html — v8 (botón flotante para saltar de año desde cualquier punto) -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -23,7 +23,7 @@
     --ink-soft:#5b6478;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0; overflow-x:hidden;}
+  html,body{margin:0;padding:0;}
   body{
     font-family:'Inter',sans-serif;
     background:
@@ -271,6 +271,54 @@
     font-family:'Caveat',cursive; font-size:1.3rem;
     color:#9db1e8;
   }
+
+  /* BOTÓN FLOTANTE DE NAVEGACIÓN RÁPIDA */
+  .fab{
+    position:fixed;
+    right:18px; bottom:18px;
+    width:56px; height:56px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#fff;
+    border:none;
+    box-shadow:0 8px 22px rgba(0,0,0,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem;
+    cursor:pointer;
+    z-index:50;
+    touch-action:manipulation;
+  }
+  .fab-menu{
+    position:fixed;
+    right:18px; bottom:84px;
+    background:var(--paper);
+    border-radius:12px;
+    box-shadow:0 12px 32px rgba(0,0,0,.4);
+    padding:8px;
+    display:none;
+    flex-direction:column;
+    gap:2px;
+    max-height:60vh;
+    overflow-y:auto;
+    z-index:50;
+    min-width:140px;
+  }
+  .fab-menu.open{display:flex;}
+  .fab-menu button{
+    background:none; border:none;
+    text-align:left;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:.9rem;
+    color:var(--ink);
+    padding:9px 12px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .fab-menu button:hover, .fab-menu button.active{
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#fff;
+  }
 </style>
 </head>
 <body>
@@ -299,6 +347,9 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <button class="fab" id="fabBtn" aria-label="Ir a un año">☰</button>
+  <div class="fab-menu" id="fabMenu"></div>
 
 <script>
 (async function(){
@@ -357,24 +408,63 @@
     return d.toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
   };
 
+  // Sube la vista justo debajo de la barra de pestañas al cambiar de año,
+  // para no tener que hacer scroll manual hacia arriba
+  function irArribaDelContenido(){
+    const barra = document.querySelector('.tabs-outer');
+    const offset = barra ? barra.getBoundingClientRect().height : 0;
+    const y = contentEl.getBoundingClientRect().top + window.scrollY - offset - 8;
+    window.scrollTo({ top: Math.max(y, 0), behavior: 'smooth' });
+  }
+
   // Tabs (por año)
   let activeYear = 'todas';
+  function cambiarAnio(anio){
+    activeYear = anio;
+    renderTabs();
+    renderGrid();
+    renderFabMenu();
+    irArribaDelContenido();
+    fabMenu.classList.remove('open');
+  }
   function renderTabs(){
     tabsEl.innerHTML = '';
     const allTab = document.createElement('div');
     allTab.className = 'tab' + (activeYear==='todas' ? ' active' : '');
     allTab.textContent = `Todas (${manifest.length})`;
-    allTab.onclick = () => { activeYear='todas'; renderTabs(); renderGrid(); };
+    allTab.onclick = () => cambiarAnio('todas');
     tabsEl.appendChild(allTab);
 
     anios.forEach(anio => {
       const t = document.createElement('div');
       t.className = 'tab' + (activeYear===anio ? ' active' : '');
       t.textContent = anio === 'sin-fecha' ? 'Sin fecha' : anio;
-      t.onclick = () => { activeYear = anio; renderTabs(); renderGrid(); };
+      t.onclick = () => cambiarAnio(anio);
       tabsEl.appendChild(t);
     });
   }
+
+  // Botón flotante: mismo listado de años, accesible desde cualquier punto del scroll
+  const fabBtn = document.getElementById('fabBtn');
+  const fabMenu = document.getElementById('fabMenu');
+  function renderFabMenu(){
+    fabMenu.innerHTML = '';
+    const opciones = [{ v:'todas', label:`Todas (${manifest.length})` }]
+      .concat(anios.map(a => ({ v:a, label: a === 'sin-fecha' ? 'Sin fecha' : a })));
+    opciones.forEach(op => {
+      const b = document.createElement('button');
+      b.textContent = op.label;
+      b.className = activeYear === op.v ? 'active' : '';
+      b.onclick = () => cambiarAnio(op.v);
+      fabMenu.appendChild(b);
+    });
+  }
+  fabBtn.onclick = () => fabMenu.classList.toggle('open');
+  document.addEventListener('click', (e) => {
+    if (!fabMenu.contains(e.target) && e.target !== fabBtn && fabMenu.classList.contains('open')) {
+      fabMenu.classList.remove('open');
+    }
+  });
 
   let visibles = manifest; // fotos actualmente mostradas, para el lightbox
   function renderGrid(){
@@ -409,6 +499,7 @@
 
   renderTabs();
   renderGrid();
+  renderFabMenu();
 
   // Lightbox
   const lb = document.getElementById('lightbox');
