@@ -1,0 +1,38 @@
+{
+  "name": "CEIP Las Viñas · Promoción 2006-2015",
+  "short_name": "Las Viñas",
+  "description": "Recuerdos en fotos y vídeos de la promoción 2006-2015 del CEIP Las Viñas",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0F1B3D",
+  "theme_color": "#0F1B3D",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icono192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icono512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
